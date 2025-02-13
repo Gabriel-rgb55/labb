@@ -7,9 +7,9 @@ public abstract class Car implements Movable {
     private Color color;
     private String modelName;
 
-    private double x; // x-position
-    private double y; // y-position
-    private double direction; // direction i grader (0-359)
+    private double x; // X-coordinate
+    private double y; // Y-coordinate
+    private double direction; // Direction in degrees (0-359)
 
     public Car(int nrDoors, double enginePower, Color color, String modelName) {
         this.nrDoors = nrDoors;
@@ -19,7 +19,7 @@ public abstract class Car implements Movable {
         stopEngine();
         this.x = 0;
         this.y = 0;
-        this.direction = 0;
+        this.direction = 0; // Facing east (0 degrees)
     }
 
     public int getNrDoors() {
@@ -103,4 +103,15 @@ public abstract class Car implements Movable {
     public double getDirection() {
         return direction;
     }
+
+    // ✅ Fixed: Use x and y for position instead of Point
+    public Point getPosition() {
+        return new Point((int) x, (int) y);
+    }
+
+    public void setPosition(Point newPosition) {
+        this.x = newPosition.x;
+        this.y = newPosition.y;
+    }
 }
+
