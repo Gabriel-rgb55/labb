@@ -1,44 +1,49 @@
 import java.awt.*;
 
-public class Scania extends Car implements Ramp {
-    private double flakvinkel; // Flakets aktuella vinkel
-    private static final double MAX_ANGLE = 70; // Maximalt tillåten vinkel för flaket
-    private static final double MIN_ANGLE = 0; // Minimalt tillåten vinkel för flaket
+public class Scania extends Car {
+    private final Ramp ramp;
 
+    // Constructor to initialize Scania attributes
     public Scania() {
-        super(2, 450, Color.RED, "Scania");
-        this.flakvinkel = 1; // Flaket börjar i uppfält läge
-    }
-
-    @Override
-    public void lowerRamp() {
-        if (getCurrentSpeed() == 0) {
-            flakvinkel = MIN_ANGLE; // Sänk flaket helt
-        } else {
-            throw new IllegalStateException("Cannot lower ramp while moving!");
-        }
-    }
-
-    @Override
-    public void raiseRamp() {
-        if (getCurrentSpeed() == 0) {
-            flakvinkel = MAX_ANGLE; // Höj flaket helt
-        } else {
-            throw new IllegalStateException("Cannot raise ramp while moving!");
-        }
-    }
-
-    @Override
-    public boolean isRampDown() {
-        return flakvinkel == MIN_ANGLE;
-    }
-
-    public double getFlakvinkel() {
-        return flakvinkel;
+        super(2, 90, Color.white, "Scania"); // Initialize Car's attributes
+        this.ramp = new Ramp(70);
     }
 
     @Override
     protected double speedFactor() {
-        return isRampDown() ? 0.1 : 0; // Kan bara köra om flaket är helt uppe
+        return getEnginePower() * 0.01;
     }
+
+
+    public void raisePlatform(double amount) {
+        if (getCurrentSpeed() > 0) {
+            throw new IllegalArgumentException("The truck cannot be moving");
+        }
+        ramp.raise(amount);
+    }
+
+    // Lower the ramp by a specific amount
+    public void lowerPlatform(double amount) {
+        if (getCurrentSpeed() > 0) {
+            throw new IllegalArgumentException("The truck cannot be moving");
+        }
+        ramp.lower(amount);
+    }
+
+    @Override
+    public void move() {
+        if (ramp.getAngle() < 70) {
+            throw new IllegalArgumentException("Angle cannot be greater than 0");
+        }
+        super.move();
+    }
+
+    @Override
+    public void gas(double amount){
+        if (ramp.getAngle() < 70) {
+            throw new IllegalArgumentException("Angle cannot be greater than 0");
+        }
+        super.gas(amount);
+    }
+
 }
