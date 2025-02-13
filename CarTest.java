@@ -1,18 +1,32 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.NoSuchElementException;
 
 class CarTest {
 
     private Car volvo;
     private Car saab;
+    private Scania scania;
+    private CarWorkshop<Volvo240> volvoWorkshop;
+    private CarWorkshop<Car> generalWorkshop;
+    private Volvo240 volvo1, volvo2;
+    private BMW bmw;
 
     @BeforeEach
     public void setUp() {
         volvo = new Volvo240();
         saab = new Saab95();
+        scania = new Scania();
         volvo.startEngine();
         saab.startEngine();
+
+        volvoWorkshop=new CarWorkshop<>(2);
+        generalWorkshop=new CarWorkshop<>(3);
+
+        volvo1=new Volvo240();
+        volvo2= new Volvo240();
+        bmw=new BMW();
     }
 
     private void testGasIncreasesSpeed(Car car) {
@@ -133,4 +147,102 @@ class CarTest {
         testEngineState(volvo);
         testEngineState(saab);
     }
-}
+
+    @Test
+    public void testRaiseRampWhileStopped() {
+        scania.stopEngine(); // Ensure truck is stationary
+        scania.raiseRamp();
+        assertEquals(70, scania.getFlakvinkel(), "Flakvinkel should be fully raised (70) when truck is stopped");
+    }
+
+    @Test
+    public void testRaiseRampWhileMoving() {
+        scania.startEngine();
+        scania.gas(0.5); // Make the truck move
+        assertThrows(IllegalStateException.class, scania::raiseRamp, "Should throw IllegalStateException when trying to raise ramp while moving");
+    }
+
+    @Test
+    public void testLowerRampWhileStopped() {
+        scania.stopEngine(); // Ensure truck is stationary
+        scania.raiseRamp(); // First, raise the ramp
+        scania.lowerRamp();
+        assertEquals(0, scania.getFlakvinkel(), "Flakvinkel should be fully lowered (0) when truck is stopped");
+    }
+
+    @Test
+    public void testLowerRampWhileMoving() {
+        scania.startEngine();
+        scania.gas(0.5); // Make the truck move
+        assertThrows(IllegalStateException.class, scania::lowerRamp, "Should throw IllegalStateException when trying to lower ramp while moving");
+    }
+
+    @Test
+    public void testSpeedFactorWhenRampIsDown() {
+        scania.lowerRamp(); // Ensure the ramp is down
+        assertEquals(0.1, scania.speedFactor(), "Speed factor should be 0.1 when the ramp is down");
+    }
+
+    @Test
+    public void testSpeedFactorWhenRampIsUp() {
+        scania.raiseRamp(); // Raise the ramp
+        assertEquals(0, scania.speedFactor(), "Speed factor should be 0 when the ramp is up");
+    }
+
+    @Test
+    public void testAddCarToWorkshop() {
+        volvoWorkshop.addCar(volvo1);
+        volvoWorkshop.addCar(volvo2);
+        assertEquals(2, volvoWorkshop.getCarCount(), "Car count should be 2 after adding two cars.");
+    }
+
+    @Test
+    public void testWorkshopCapacityLimit() {
+        volvoWorkshop.addCar(volvo1);
+        volvoWorkshop.addCar(volvo2);
+        volvoWorkshop.addCar(new Volvo240()); // Should be rejected
+        assertEquals(2, volvoWorkshop.getCarCount(), "Workshop should not exceed max capacity.");
+    }
+
+    @Test
+    public void testRetrieveCarFromWorkshop() {
+        volvoWorkshop.addCar(volvo1);
+        volvoWorkshop.addCar(volvo2);
+
+        Volvo240 retrievedCar = volvoWorkshop.retrieveCar();
+        assertEquals(volvo1, retrievedCar, "First retrieved car should be the first one added.");
+        assertEquals(1, volvoWorkshop.getCarCount(), "Car count should decrease after retrieving a car.");
+    }
+
+    @Test
+    public void testRetrieveCarFromEmptyWorkshop() {
+        assertNull(volvoWorkshop.retrieveCar(), "Retrieving from an empty workshop should return null.");
+    }
+
+    @Test
+    public void testTypeSafetyInWorkshop() {
+        volvoWorkshop.addCar(volvo1);
+        // Uncommenting the next line should cause a compile-time error:
+        //volvoWorkshop.addCar(bmw);
+    }
+
+    @Test
+    public void testGeneralWorkshopAcceptsMultipleCarTypes() {
+        generalWorkshop.addCar(volvo1);
+        generalWorkshop.addCar(bmw);
+        assertEquals(2, generalWorkshop.getCarCount(), "General workshop should accept different car types.");
+    }
+
+    @Test
+    public void testRetrieveAllCars() {
+        generalWorkshop.addCar(volvo1);
+        generalWorkshop.addCar(bmw);
+
+        generalWorkshop.retrieveCar();
+        generalWorkshop.retrieveCar();
+
+        assertEquals(0, generalWorkshop.getCarCount(), "Workshop should be empty after retrieving all cars.");
+    }
+    }
+
+
