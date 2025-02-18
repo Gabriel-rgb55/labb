@@ -1,18 +1,19 @@
 import java.awt.*;
 
-class CarTransport extends Car {
-    private Ramp ramp = new Ramp();
-    private Garage<Car> storage; // Stores multiple cars
+public class CarTransport extends Car {
+    private Ramp ramp;
+    private Garage<PassengerCar> storage;
     private static final int MAX_CAPACITY = 5;
 
     public CarTransport() {
         super(2, 300, Color.BLUE, "CarTransport");
+        this.ramp = new Ramp();
         this.storage = new Garage<>(MAX_CAPACITY);
     }
 
     public void lowerRamp() {
         if (getCurrentSpeed() == 0) {
-            ramp.lower(); // Lower the ramp if the car is stationary
+            ramp.lower(10);  // Exempel: sänker rampen med 10 grader
         } else {
             throw new IllegalStateException("Cannot lower ramp while moving!");
         }
@@ -20,23 +21,29 @@ class CarTransport extends Car {
 
     public void raiseRamp() {
         if (getCurrentSpeed() == 0) {
-            ramp.raise(); // Raise the ramp if the car is stationary
+            ramp.raise(10);  // Exempel: höjer rampen med 10 grader
         } else {
             throw new IllegalStateException("Cannot raise ramp while moving!");
         }
     }
 
-    public void loadCar(Car car) {
+    public void loadCar(PassengerCar car) {
+        if (storage.getVehicleCount() >= MAX_CAPACITY) {
+            throw new IllegalStateException("Transporten är full!");
+        }
+        if (storage.getVehicleList().contains(car)) {
+            throw new IllegalStateException("Bilen är redan på transporten!");
+        }
         if (ramp.isRampDown()) {
-            storage.addVehicle(car); // Load the car only if the ramp is down
+            storage.addVehicle(car);  // Ladda bilen om rampen är nere
         } else {
             throw new IllegalStateException("Cannot load cars while ramp is up!");
         }
     }
 
-    public Car unloadCar() {
+    public PassengerCar unloadCar() {
         if (ramp.isRampDown()) {
-            return storage.retrieveVehicle(); // Unload the car only if the ramp is down
+            return storage.retrieveVehicle();  // Avlasta bilen om rampen är nere
         } else {
             throw new IllegalStateException("Cannot unload cars while ramp is up!");
         }
@@ -48,6 +55,6 @@ class CarTransport extends Car {
 
     @Override
     protected double speedFactor() {
-        return ramp.isRampDown() ? 0.1 : 1; // Can't move fast with the ramp down
+        return ramp.isRampDown() ? 0.1 : 1;  // Justera hastigheten om rampen är nere
     }
 }
