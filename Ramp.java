@@ -1,44 +1,41 @@
 public class Ramp {
-    private double angle; // Represents the angle of the ramp (for Scania)
-    private boolean isRampDown; // Represents the state of the ramp (for CarTransport)
-    private final double maxAngle; // Maximum angle for the ramp (for Scania)
+    private double angle; // Anger rampens nuvarande vinkel
 
-    //overloadar 
-    public Ramp(double maxAngle) {
-        this.angle = 0;
-        this.maxAngle = maxAngle;
-    }
-
-    //overloadar 
+    //initial vinkel på 0 grader om inget anges
     public Ramp() {
-        this(0);
-        this.isRampDown = false;// Default maxAngle of 0 (binary state only)
+        this.angle = 0; // Sätt standardvinkel till 0 grader
     }
 
-    // For CarTransport: binary state (up/down)
-    public void raise() {
-        this.isRampDown = false;
+
+    public Ramp(double initialAngle) {
+        this.angle = initialAngle;
     }
 
-    public void lower() {
-        this.isRampDown = true;
-    }
 
-    public boolean isRampDown() {
-        return isRampDown;
-    }
-
-    // For Scania: angular state
     public void raise(double amount) {
-        this.angle = Math.max(this.angle - amount, 0);
+        if (amount < 0) {
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
+        angle = Math.min(angle + amount, 90); // Max 90 grader
+        System.out.println("Ramp raised by " + amount + " degrees to " + angle + " degrees.");
     }
+
 
     public void lower(double amount) {
-        this.angle = Math.min(this.angle + amount, maxAngle);
+        if (amount < 0) {
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
+        angle = Math.max(angle - amount, 0); // Min 0 grader
+        System.out.println("Ramp lowered by " + amount + " degrees to " + angle + " degrees.");
     }
 
+    // Returnera nuvarande vinkel
     public double getAngle() {
         return angle;
     }
 
+    // Kontrollera om rampen är nedfälld
+    public boolean isRampDown() {
+        return angle > 0;
+    }
 }
