@@ -114,4 +114,3 @@ public abstract class Car implements Movable {
         this.y = newPosition.y;
     }
 }
-
