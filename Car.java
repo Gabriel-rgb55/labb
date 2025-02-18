@@ -104,7 +104,7 @@ public abstract class Car implements Movable {
         return direction;
     }
 
-    // ✅ Fixed: Use x and y for position instead of Point
+    
     public Point getPosition() {
         return new Point((int) x, (int) y);
     }
