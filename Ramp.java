@@ -1,5 +1,5 @@
 public class Ramp {
-    private double angle; // Anger rampens nuvarande vinkel
+    private static double angle; // Anger rampens nuvarande vinkel
 
     //initial vinkel på 0 grader om inget anges
     public Ramp() {
@@ -30,7 +30,7 @@ public class Ramp {
     }
 
     // Returnera nuvarande vinkel
-    public double getAngle() {
+    public static double getAngle() {
         return angle;
     }
 
