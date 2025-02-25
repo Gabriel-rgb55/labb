@@ -92,6 +92,20 @@ public abstract class Car implements Movable {
         direction = (direction - 90 + 360) % 360;
     }
 
+    protected void setX(double amount){
+        x = amount;
+    }
+
+    protected void setY(double amount){
+        y = amount;
+    }
+
+    protected void setDirection(double amount){
+        direction = amount;
+    }
+
+
+
     public double getX() {
         return x;
     }
