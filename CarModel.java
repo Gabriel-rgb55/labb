@@ -1,20 +1,81 @@
 import java.awt.Point;
 import java.util.ArrayList;
+import java.awt.image.BufferedImage;
 import java.util.List;
+import javax.imageio.ImageIO;
+import java.io.IOException;
+import java.util.*;
 
 public class CarModel {
+    private Map<Class<? extends Car>, BufferedImage> carImageMap = new HashMap<>();
     private List<Car> cars = new ArrayList<>();
+    private List<CarObserver> observers = new ArrayList<>(); // List of observers
+    private String statusMessage = "";
+
+    // Add an observer
+    public void addObserver(CarObserver observer) {
+        observers.add(observer);
+    }
+
+
+    // Notify all observers
+    private void notifyObservers() {
+        Point[] carPositions = getCarPositions();
+        BufferedImage[] imagesArray = getCarImages(); // Get images from the map
+        for (CarObserver observer : observers) {
+            observer.update(carPositions,imagesArray, statusMessage);
+        }
+    }
+
+    // Load car images and create the mapping
+    public void loadCarImages() {
+        try {
+            carImageMap.put(Volvo240.class, ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("pics/Volvo240.jpg"))));
+            carImageMap.put(Saab95.class, ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("pics/Saab95.jpg"))));
+            carImageMap.put(Scania.class, ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("pics/Scania.jpg"))));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public BufferedImage[] getCarImages() {
+        BufferedImage[] images = new BufferedImage[cars.size()];
+        for (int i = 0; i < cars.size(); i++) {
+            Car car = cars.get(i);
+            images[i] = carImageMap.get(car.getClass()); // Get the image from the map
+        }
+        return images;
+    }
+
+
+    public void setStatusMessage(String message) {
+        this.statusMessage = message;
+        notifyObservers();
+    }
+
+    public void addRandomCar() {
+        if (cars.size()<=8) {
+            Car car = CarFactory.createRandomCar();
+            addCar(car);
+        }
+    }
+
 
     public void addCar(Car car) {
         cars.add(car);
+        setCarPositions();
     }
 
-    public List<Car> getCars() {
-        return cars;
+    public void removeCar () {
+        if (!cars.isEmpty()) {
+            cars.removeLast();
+        }
+        notifyObservers();
     }
 
     public void removeCar(Car car) {
         cars.remove(car);
+        notifyObservers();
     }
 
     public Point[] getCarPositions() {
@@ -54,9 +115,10 @@ public class CarModel {
             // Update the car's position in the model
             moveCar(i, x, y);
         }
+        notifyObservers();
     }
 
-    public void checkCollisions(CarWorkshop<Volvo240> workshop, DrawPanel drawPanel) {
+    public void checkCollisions(CarWorkshop<Volvo240> workshop, CarView frame) {
         for (int i = 0; i < cars.size(); i++) {
             Car car = cars.get(i);
             if (car instanceof Volvo240) {
@@ -69,20 +131,19 @@ public class CarModel {
                 if (x >= workshopX && x <= workshopX + 100 &&
                         y >= workshopY && y <= workshopY + 100) {
                     // Collision detected, load the Volvo into the workshop
-                    workshop.addCar((Volvo240) car);
+                    workshop.retrieveCar((Volvo240) car);
                     removeCar(car); // Remove the car from the model
-                    drawPanel.removeCar(i); // Update the draw panel
-                    drawPanel.setStatusMessage("Volvo loaded into the workshop!");
+                    setStatusMessage("Volvo loaded into the workshop!"); // Notify observers
                 }
             }
         }
     }
 
-    public void setCarPositions() {
-        for (int i = 0; i < cars.size(); i++) {
-            cars.get(i).setX(0);
-            cars.get(i).setY(i * 100);
+    public void setCarPositions () {
+        if (cars.size()>1) {
+            cars.getLast().setY(cars.get(cars.size()-2).getY() + 60);
         }
+        notifyObservers();
     }
 
     public void gas(int amount) {
@@ -90,10 +151,13 @@ public class CarModel {
         for (Car car : cars) {
             try {
                 car.gas(gas);
-            } catch (IllegalArgumentException ex) {
+            }
+            catch (IllegalArgumentException ex){
                 continue;
             }
+
         }
+        notifyObservers();
     }
 
     public void brake(int amount) {
@@ -101,6 +165,7 @@ public class CarModel {
         for (Car car : cars) {
             car.brake(brakeForce);
         }
+        notifyObservers();
     }
 
     public void setTurbo(boolean on) {
@@ -114,6 +179,7 @@ public class CarModel {
                 }
             }
         }
+        notifyObservers();
     }
 
     public void liftBed() {
@@ -123,10 +189,12 @@ public class CarModel {
                     Scania scania = (Scania) car;
                     scania.raisePlatform(70);
                 }
-            } catch (IllegalArgumentException ex) {
+            }
+            catch (IllegalArgumentException ex){
                 continue;
             }
         }
+        notifyObservers();
     }
 
     public void lowerBed() {
@@ -136,21 +204,29 @@ public class CarModel {
                     Scania scania = (Scania) car;
                     scania.lowerPlatform(70);
                 }
-            } catch (IllegalArgumentException ex) {
+            }
+            catch (IllegalArgumentException ex) {
                 continue;
             }
         }
+        notifyObservers();
     }
 
     public void startAllCars() {
         for (Car car : cars) {
             car.startEngine();
         }
+        notifyObservers();
+    }
+
+    public int getCarCount(){
+        return cars.size();
     }
 
     public void stopAllCars() {
         for (Car car : cars) {
             car.stopEngine();
         }
+        notifyObservers();
     }
 }
