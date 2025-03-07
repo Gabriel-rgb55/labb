@@ -7,7 +7,7 @@ import javax.swing.*;
 
 // This panel represents the animated part of the view with the car images.
 
-public class DrawPanel extends JPanel {
+public class DrawPanel extends JPanel implements CarObserver {
 
     // Arrays to store car positions and images
     private Point[] carPositions;
@@ -24,15 +24,7 @@ public class DrawPanel extends JPanel {
         this.setPreferredSize(new Dimension(x, y));
         this.setBackground(Color.green);
 
-
-        carImages = new BufferedImage[4];
-        // Load images and initialize positions
         try {
-            carImages[0] = ImageIO.read(DrawPanel.class.getResourceAsStream("pics/Volvo240.jpg"));
-            carImages[1] = ImageIO.read(DrawPanel.class.getResourceAsStream("pics/Saab95.jpg"));
-            carImages[2] = ImageIO.read(DrawPanel.class.getResourceAsStream("pics/Scania.jpg"));
-            carImages[3] = ImageIO.read(DrawPanel.class.getResourceAsStream("pics/Volvo240.jpg"));
-            // Load workshop image
             workshopImage = ImageIO.read(DrawPanel.class.getResourceAsStream("pics/VolvoBrand.jpg"));
             workshopPosition = new Point(300, 300);
 
@@ -43,23 +35,12 @@ public class DrawPanel extends JPanel {
 
     }
 
-
-    public void updateCarPositions(Point[] positions) {
-        this.carPositions = positions;
+    @Override
+    public void update(Point[] carPositions, BufferedImage[] carImages, String statusMessage) {
+        this.carPositions = carPositions;
+        this.carImages = carImages;
+        this.statusMessage = statusMessage;
         repaint();
-    }
-
-
-    public void setStatusMessage(String message) {
-        this.statusMessage = message;
-        repaint(); // Trigger a repaint to update the display
-    }
-
-    public void removeCar(int index) {
-        if (index >= 0 && index < carImages.length) {
-            carImages[index] = null; // Remove the image
-            repaint(); // Refresh the display
-        }
     }
 
 
