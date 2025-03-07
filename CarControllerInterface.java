@@ -6,4 +6,9 @@ public interface CarControllerInterface {
     void lowerBed();
     void startAllCars();
     void stopAllCars();
+
+    void addCar();
+    void removeCar();
+
+    int getCarCount();
 }
