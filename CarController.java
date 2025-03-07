@@ -20,9 +20,10 @@ public class CarController implements CarControllerInterface {
     public CarController(CarModel carmodel, CarView carView) {
         this.carModel = carmodel;
         this.frame = carView;
+        carmodel.addObserver(frame.drawPanel);
+
         volvo240CarWorkshop.setX(300);
         volvo240CarWorkshop.setY(300);
-        frame.drawPanel.updateCarPositions(carModel.getCarPositions());
     }
 
     public void initTimer() {
@@ -36,9 +37,8 @@ public class CarController implements CarControllerInterface {
     private class TimerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             int screenWidth = frame.getWidth();
-            carModel.updateCars(screenWidth); // Update car positions
-            carModel.checkCollisions(volvo240CarWorkshop, frame.drawPanel); // Check for collisions
-            frame.drawPanel.updateCarPositions(carModel.getCarPositions()); // Update the view
+            carModel.updateCars(screenWidth); // This will notify observers
+            carModel.checkCollisions(volvo240CarWorkshop, frame); // This will notify observers
         }
     }
 
@@ -76,5 +76,22 @@ public class CarController implements CarControllerInterface {
     public void stopAllCars() {
         carModel.stopAllCars();
     }
+
+    @Override
+    public void removeCar() {
+        carModel.removeCar();
+    }
+
+    @Override
+    public int getCarCount() {
+        return carModel.getCarCount();
+    }
+
+
+    @Override
+    public void addCar() {
+        carModel.addRandomCar();
+    }
+
 
 }
