@@ -1,0 +1,84 @@
+@startuml
+
+interface CarControllerInterface {
+    + void gas(int amount)
+    + void brake(int amount)
+    + void setTurbo(boolean on)
+    + void liftBed()
+    + void lowerBed()
+    + void startAllCars()
+    + void stopAllCars()
+}
+
+class CarController {
+    - CarModel carModel
+    - CarView frame
+    - Timer timer
+    + void gas(int amount)
+    + void brake(int amount)
+    + void setTurbo(boolean on)
+    + void liftBed()
+    + void lowerBed()
+    + void startAllCars()
+    + void stopAllCars()
+    + void initTimer()
+}
+
+class CarModel {
+    - List<Car> cars
+    + void addCar(Car car)
+    + void removeCar(Car car)
+    + Point[] getCarPositions()
+    + void updateCars(int screenWidth)
+    + void checkCollisions(CarWorkshop<Volvo240> workshop, DrawPanel drawPanel)
+    + void gas(int amount)
+    + void brake(int amount)
+    + void setTurbo(boolean on)
+    + void liftBed()
+    + void lowerBed()
+    + void startAllCars()
+    + void stopAllCars()
+}
+
+class CarView {
+    - DrawPanel drawPanel
+    - JPanel controlPanel
+    - JButton gasButton
+    - JButton brakeButton
+    - JButton turboOnButton
+    - JButton turboOffButton
+    - JButton liftBedButton
+    - JButton lowerBedButton
+    - JButton startButton
+    - JButton stopButton
+    + void Initialize(String framename, CarControllerInterface cc)
+}
+
+class DrawPanel {
+    - Point[] carPositions
+    - BufferedImage[] carImages
+    - String statusMessage
+    - Point workshopPosition
+    - BufferedImage workshopImage
+    + void updateCarPositions(Point[] positions)
+    + void setStatusMessage(String message)
+    + void removeCar(int index)
+}
+
+class Main {
++ static void main(String[] args)
+}
+
+
+
+CarController --> CarModel : controls
+CarController --> CarView : updates
+CarView --> DrawPanel : contains
+CarView --> CarControllerInterface : implements
+CarController ..|> CarControllerInterface : implements
+CarModel --> CarView : has a
+Main --> CarModel : creates
+Main --> CarView : creates
+Main --> CarController : creates
+
+@enduml
